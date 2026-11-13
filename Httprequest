@@ -1,0 +1,58 @@
+using System;
+using System.Net.Http;
+using System.Text;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+// Input variables
+string url = "https://api.example.com/data";
+string method = "POST";
+string requestBody = "{\"name\":\"Akshay\"}";
+string token = "YOUR_ACCESS_TOKEN";
+
+// Output variables
+string responseContent = "";
+int statusCode = 0;
+
+try
+{
+    using (HttpClient client = new HttpClient())
+    {
+        client.Timeout = TimeSpan.FromSeconds(60);
+
+        // Headers
+        client.DefaultRequestHeaders.Add(
+            "Authorization", "Bearer " + token);
+
+        client.DefaultRequestHeaders.Add(
+            "Accept", "application/json");
+
+        // Create request
+        using (HttpRequestMessage request =
+            new HttpRequestMessage(
+                new HttpMethod(method), url))
+        {
+            if (method != "GET" && method != "DELETE")
+            {
+                request.Content = new StringContent(
+                    requestBody,
+                    Encoding.UTF8,
+                    "application/json");
+            }
+
+            // Execute request
+            HttpResponseMessage response =
+                client.SendAsync(request).GetAwaiter().GetResult();
+
+            statusCode = (int)response.StatusCode;
+
+            responseContent =
+                response.Content.ReadAsStringAsync()
+                .GetAwaiter().GetResult();
+        }
+    }
+}
+catch (Exception ex)
+{
+    responseContent = ex.ToString();
+}
